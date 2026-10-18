@@ -338,9 +338,9 @@ def build():
     add_text(slide, "Optional integrations: Firebase Auth (verified tokens), Gemini/Vertex text synthesis, PostgreSQL-compatible DATABASE_URL.", 0.48, 2.86, 9.05, 0.33, 9.4, MUTED)
     add_pill(slide, 0.45, 3.48, 2.53, "CONFIGURED DEPLOYMENT PATH", PALE_AMBER, AMBER, 8.8)
     target = [
-        (0.45, "GitLab CI", "Tests and build"),
+        (0.45, "GitHub Actions", "Tests and deploy"),
         (2.30, "OIDC / WIF", "Keyless Google identity"),
-        (4.15, "Cloud Build", "Builds root-context image"),
+        (4.15, "Docker build", "Enables API and builds image"),
         (6.00, "Artifact Registry", "Commit-tagged container"),
         (7.85, "Cloud Run", "One combined app service"),
     ]
@@ -351,7 +351,7 @@ def build():
     slide = body_slide(presentation, 9, "Technology stack")
     add_card(slide, 0.45, 1.62, 2.85, 2.85, "Experience", "React 19 + TypeScript\nVite build\nRecharts + Lucide\nResponsive citizen and governance views", CYAN, 10.1, PALE)
     add_card(slide, 3.56, 1.62, 2.85, 2.85, "Services and workflow", "FastAPI + Pydantic\nLangGraph: six sequential nodes\nDeterministic policy/SLA checks\nOptional Gemini/Vertex synthesis", "4E7DB1", 10.1, WHITE)
-    add_card(slide, 6.67, 1.62, 2.85, 2.85, "Data and deployment", "SQLAlchemy + SQLite in local demo\nPostgreSQL-compatible connection\nFirebase token verification optional\nDocker + GitLab CI + Cloud Run target", CYAN, 10.1, PALE_GREEN)
+    add_card(slide, 6.67, 1.62, 2.85, 2.85, "Data and deployment", "SQLAlchemy + SQLite in local demo\nPostgreSQL-compatible connection\nFirebase token verification optional\nDocker + GitHub Actions + Cloud Run target", CYAN, 10.1, PALE_GREEN)
     add_note(slide, "No Firestore, BigQuery, Vertex RAG, external department API or notification provider is currently connected.", 4.90)
 
     slide = body_slide(presentation, 10, "Cost status and Google Cloud cost drivers")
