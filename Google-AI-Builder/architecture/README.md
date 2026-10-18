@@ -4,7 +4,7 @@ Open these HTML files directly in a browser. No server, npm install, CDN, creden
 
 - [Codebase architecture](codebase.html): file/module dependency diagram, numbered link register, and source/configuration/test mappings.
 - [Request and telemetry architecture](request-flow.html): technology stack, request/response sequence, six-agent execution, persistence, error paths, telemetry inventory, and other API paths.
-- [Cloud Run target architecture](cloud-run-target.html): proposed GitLab CI/CD, microfrontend, Cloud Run microservice, event, data-ownership, and IAM boundaries. This is a migration target, not deployed infrastructure.
+- [Cloud Run target architecture](cloud-run-target.html): GitHub Actions deployment path, API enablement, proposed microfrontend and Cloud Run service boundaries, event/data ownership, and IAM. The workflow deploys one current app container; the service split remains a migration target.
 
 ## Dependencies
 

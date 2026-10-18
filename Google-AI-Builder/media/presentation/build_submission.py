@@ -394,7 +394,7 @@ def build():
     add_note(slide, "The attached Cloud Run diagram is a target architecture; current source remains one React SPA and one FastAPI runtime.", 4.68, AMBER)
 
     slide = body_slide(presentation, 14, "Repository, demo and product access")
-    add_card(slide, 0.45, 1.72, 2.85, 2.35, "Repository", "GitLab migration is planned. This workspace is not currently connected to a public Git remote.", CYAN, 10.4, PALE)
+    add_card(slide, 0.45, 1.72, 2.85, 2.35, "Repository", "Public GitHub repository. Repository URL is not included in this submission deck.", CYAN, 10.4, PALE)
     add_card(slide, 3.56, 1.72, 2.85, 2.35, "Demo video", "media/demo-video/samanvai-overview.mp4\n139 seconds\nEnglish voice-over", "4E7DB1", 10.4, WHITE)
     add_card(slide, 6.67, 1.72, 2.85, 2.35, "Product", "Local demo: http://127.0.0.1:8000\nNo public Cloud Run URL or custom DNS is provisioned.", CYAN, 10.4, PALE_GREEN)
     add_note(slide, "Architecture reference: architecture/cloud-run-target.html. The service split shown there is proposed, not deployed.", 4.65)

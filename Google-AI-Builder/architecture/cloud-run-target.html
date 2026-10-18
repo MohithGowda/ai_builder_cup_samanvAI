@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Proposed SamanvAI microfrontend and microservice target architecture for GitLab CI/CD and Google Cloud Run.">
+  <meta name="description" content="Proposed SamanvAI microfrontend and microservice target architecture for GitHub Actions and Google Cloud Run.">
   <title>SamanvAI | Cloud Run Target Architecture</title>
   <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/architecture.css">
@@ -39,24 +39,24 @@
     <nav aria-label="Architecture documents"><a href="codebase.html">01 / Codebase</a><a href="request-flow.html">02 / Request flow</a><a href="cloud-run-target.html" aria-current="page">03 / Cloud target</a></nav>
   </header>
   <main>
-    <div class="document-heading"><div><p class="eyebrow">PROPOSED TARGET / 03</p><h1>Independently deployable. Deliberately connected.</h1><p class="lede">A migration target for SamanvAI: independently released React microfrontends and FastAPI services, with GitLab CI building and deploying containers to Google Cloud Run.</p></div><span class="edition">ARCHITECTURE STATUS<br><strong>Proposed, not deployed</strong></span></div>
+    <div class="document-heading"><div><p class="eyebrow">PROPOSED TARGET / 03</p><h1>Independently deployable. Deliberately connected.</h1><p class="lede">A migration target for SamanvAI: GitHub Actions builds the current container for Cloud Run, while independently released microfrontends and FastAPI services remain future work.</p></div><span class="edition">ARCHITECTURE STATUS<br><strong>Current deploy + future target</strong></span></div>
     <div class="notice"><strong>Cloud Run is not Kubernetes.</strong> This target uses managed Cloud Run services. It does not deploy into a Kubernetes cluster. If Kubernetes is a firm requirement, use GKE and a separate deployment target rather than mixing the two models.</div>
     <div class="metadata"><span><i class="dot amber"></i>Proposed delivery path</span><span><i class="dot green"></i>Cloud Run runtime</span><span><i class="dot blue"></i>Managed data / events</span><span>Optional components are dashed</span></div>
     <section aria-labelledby="diagram-title">
-      <div class="section-top"><div><p class="eyebrow">03.1 / PLATFORM VIEW</p><h2 id="diagram-title">From GitLab commit to a scoped service response.</h2></div></div>
-      <div class="target-diagram" role="region" aria-label="Scrollable proposed GitLab and Google Cloud Run architecture diagram" tabindex="0">
+      <div class="section-top"><div><p class="eyebrow">03.1 / PLATFORM VIEW</p><h2 id="diagram-title">From GitHub commit to a scoped service response.</h2></div></div>
+      <div class="target-diagram" role="region" aria-label="Scrollable proposed GitHub Actions and Google Cloud Run architecture diagram" tabindex="0">
         <svg viewBox="0 0 1480 1010" role="img" aria-labelledby="svg-title svg-description">
           <title id="svg-title">SamanvAI proposed microfrontend and microservice architecture on Cloud Run</title>
-          <desc id="svg-description">GitLab CI authenticates to Google Cloud through Workload Identity Federation, builds versioned containers, pushes them to Artifact Registry, and deploys separately to Cloud Run. Browser microfrontends call an API Gateway routing to independently deployable identity, application, governance and agent services. Cloud SQL, Pub/Sub, Secret Manager and Vertex AI are managed dependencies.</desc>
+          <desc id="svg-description">GitHub Actions authenticates to Google Cloud through Workload Identity Federation, enables the Cloud Run Admin API, builds a versioned container, pushes it to Artifact Registry, and deploys the current app to Cloud Run. Browser microfrontends and split backend services are future migration boundaries. Cloud SQL, Pub/Sub, Secret Manager and Vertex AI are target managed dependencies.</desc>
           <defs>
             <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9z" fill="#508675"/></marker>
             <marker id="arrowBlue" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9z" fill="#397796"/></marker>
             <marker id="arrowAmber" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9z" fill="#9b6a2f"/></marker>
           </defs>
           <text x="30" y="32" class="section">DELIVERY PLANE / EVERY MERGE REQUEST AND RELEASE IS TESTED BEFORE DEPLOY</text>
-          <rect x="30" y="52" width="230" height="105" rx="7" class="node"/><text x="50" y="83" class="title">GitLab repository</text><text x="50" y="108" class="body">Monorepo with service ownership</text><text x="50" y="129" class="small">.gitlab-ci.yml · protected main</text>
-          <rect x="320" y="52" width="265" height="105" rx="7" class="node node-amber"/><text x="340" y="83" class="title">GitLab CI pipeline</text><text x="340" y="108" class="body">Test → Cloud Build → publish</text><text x="340" y="129" class="small">Deploy only from protected branch</text>
-          <rect x="650" y="52" width="205" height="105" rx="7" class="node node-amber"/><text x="670" y="83" class="title">Workload Identity</text><text x="670" y="108" class="body">GitLab OIDC → Google STS</text><text x="670" y="129" class="small">Keyless, short-lived credentials</text>
+          <rect x="30" y="52" width="230" height="105" rx="7" class="node"/><text x="50" y="83" class="title">GitHub repository</text><text x="50" y="108" class="body">Public source repository</text><text x="50" y="129" class="small">.github/workflows/deploy-cloud-run.yml</text>
+          <rect x="320" y="52" width="265" height="105" rx="7" class="node node-amber"/><text x="340" y="83" class="title">GitHub Actions</text><text x="340" y="108" class="body">Test → OIDC auth → Docker build</text><text x="340" y="129" class="small">Deploy only from default branch</text>
+          <rect x="650" y="52" width="205" height="105" rx="7" class="node node-amber"/><text x="670" y="83" class="title">WIF + API enablement</text><text x="670" y="108" class="body">GitHub OIDC → Google STS</text><text x="670" y="129" class="small">Enables run.googleapis.com</text>
           <rect x="920" y="52" width="220" height="105" rx="7" class="node node-blue"/><text x="940" y="83" class="title">Artifact Registry</text><text x="940" y="108" class="body">Current app image</text><text x="940" y="129" class="small">Commit SHA tag + digest</text>
           <rect x="1200" y="52" width="250" height="105" rx="7" class="node node-green"/><text x="1220" y="83" class="title">Cloud Run deploy</text><text x="1220" y="108" class="body">One combined app service today</text><text x="1220" y="129" class="small">Service splits are a later migration</text>
           <path d="M260 104h55" class="deploy-arrow"/><path d="M585 104h60" class="deploy-arrow"/><path d="M855 104h60" class="deploy-arrow"/><path d="M1140 104h55" class="deploy-arrow"/>
@@ -93,13 +93,13 @@
           <text x="35" y="978" class="small">Database, Pub/Sub and Vertex AI shown as target services only. Provision IAM, network access, backups, retention and regional policy before production.</text>
         </svg>
       </div>
-      <p class="target-caption">Current delivery: GitLab builds one image containing the Vite frontend and FastAPI backend and deploys one Cloud Run service. The multi-service and microfrontend boundaries below are the proposed migration target, not deployed infrastructure.</p>
+      <p class="target-caption">Current delivery: GitHub Actions builds one image containing the Vite frontend and FastAPI backend and deploys one Cloud Run service. The multi-service and microfrontend boundaries below are the proposed migration target, not deployed infrastructure.</p>
     </section>
     <section aria-labelledby="boundary-title"><div class="section-top"><div><p class="eyebrow">03.2 / IMPLEMENTATION NOTES</p><h2 id="boundary-title">Keep the boundaries honest.</h2></div></div>
       <div class="architecture-notes">
         <article><h3>Microfrontend release units</h3><p>Start with a shared shell and independently built citizen and official remotes. Define versioned UI contracts and an explicit compatibility policy. A static Cloud Run container can serve each bundle; avoid loading arbitrary remote code without trusted origins and CSP.</p></article>
         <article><h3>Split by data ownership</h3><p>Extract applications first, then governance read models and agent/knowledge access. Services communicate through APIs or domain events. Use an outbox for reliable publication; avoid direct access to another service's tables. A shared Cloud SQL instance is a migration step, not shared ownership.</p></article>
-        <article><h3>GitLab deploy identity</h3><p>Use GitLab OIDC with Google Workload Identity Federation, narrowly bound to the project and protected branch. Grant Artifact Registry writer and Cloud Run deploy permissions to the pipeline identity. Runtime service accounts get only their own data, Pub/Sub and Vertex permissions.</p></article>
+        <article><h3>GitHub deploy identity</h3><p>Use GitHub OIDC with Google Workload Identity Federation, narrowly bound to the exact repository and default branch. The workflow identity needs Service Usage Admin to enable APIs, Artifact Registry Writer to publish, Cloud Run Admin to deploy, and Service Account User only on the runtime account.</p></article>
       </div>
     </section>
     <div class="notice"><strong>Migration order:</strong> add health/readiness contracts and external PostgreSQL; extract the cases API behind the existing client; move governance reads to a projection; isolate agent calls; then split the shell and remotes. Deploy each step behind a stable gateway route and retain a rollback revision. Do not split the six LangGraph nodes into six services by default.</div>

@@ -10,7 +10,6 @@ backend/data
 artifacts
 *-service-account.json
 architecture
-.gitlab-ci.yml
-.gcloudignore
+.github
 README.md
 backend/test_*.py

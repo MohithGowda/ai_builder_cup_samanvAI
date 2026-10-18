@@ -84,9 +84,9 @@ for (const name of documents) {
 }
 const targetHtml = fs.readFileSync(path.join(__dirname, 'cloud-run-target.html'), 'utf8');
 verify(targetHtml.includes('data-document="cloud-run-target"'), 'Cloud Run target document ID is missing');
-verify(targetHtml.includes('Proposed, not deployed'), 'Cloud Run target must be labeled as proposed');
+verify(targetHtml.includes('Current deploy + future target'), 'Cloud Run current and future architecture boundaries must be labeled');
 verify(targetHtml.includes('Cloud Run is not Kubernetes'), 'Cloud Run and Kubernetes boundary is missing');
-verify(targetHtml.includes('Workload Identity'), 'GitLab workload identity path is missing');
+verify(targetHtml.includes('Workload Identity'), 'GitHub workload identity path is missing');
 verify(targetHtml.includes('Artifact Registry'), 'Container registry path is missing');
 verify(targetHtml.includes('MICROFRONTENDS'), 'Microfrontend target boundary is missing');
 verify(targetHtml.includes('PROPOSED FUTURE / GOOGLE CLOUD RUN SERVICE BOUNDARIES'), 'Cloud Run service boundary is missing');
@@ -95,7 +95,7 @@ for (const match of targetHtml.matchAll(/(?:src|href)="([^"#]+)"/g)) {
   if (!/^https?:/.test(target)) verify(fs.statSync(path.resolve(__dirname, target)).isFile(), `Broken target-architecture dependency: ${target}`);
 }
 verify(!/<(?:script|link)\b[^>]*(?:src|href)="https?:/i.test(targetHtml), 'External target-architecture dependency');
-console.log('cloud-run-target: proposed GitLab, microfrontend and Cloud Run topology');
+console.log('cloud-run-target: GitHub Actions, Cloud Run API enablement and future service topology');
 const journeyContext = vm.createContext({});
 vm.runInContext(fs.readFileSync(path.join(__dirname, 'config', 'journey.config.js'), 'utf8'), journeyContext);
 const journey = journeyContext.SAMANVAI_JOURNEY;

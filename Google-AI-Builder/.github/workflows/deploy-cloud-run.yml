@@ -1,0 +1,134 @@
+name: Test and deploy SamanvAI to Cloud Run
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install backend dependencies
+        run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
+      - name: Run backend tests
+        run: python -m unittest backend.test_domain backend.test_jurisdiction backend.test_retrieval backend.test_api -v
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build frontend
+        run: npm run build
+
+  deploy-cloud-run:
+    needs: [backend-tests, frontend-build]
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION || 'asia-south1' }}
+      GCP_WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
+      GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT: ${{ vars.CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT }}
+      CLOUD_SQL_INSTANCE: ${{ vars.CLOUD_SQL_INSTANCE }}
+      DATABASE_URL_SECRET: ${{ vars.DATABASE_URL_SECRET }}
+      GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY || 'samanvai' }}
+      CLOUD_RUN_SERVICE: samanvai
+      VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+      VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+      VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in GCP_PROJECT_ID GCP_WIF_PROVIDER GCP_DEPLOY_SERVICE_ACCOUNT \
+            CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT CLOUD_SQL_INSTANCE DATABASE_URL_SECRET \
+            VITE_FIREBASE_API_KEY VITE_FIREBASE_AUTH_DOMAIN VITE_FIREBASE_PROJECT_ID; do
+            if [[ -z "${!name}" ]]; then echo "Missing GitHub Actions variable: $name" >&2; exit 1; fi
+          done
+
+      - name: Authenticate to Google Cloud with GitHub OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Enable Cloud Run Admin API and deployment APIs
+        run: >-
+          gcloud services enable run.googleapis.com artifactregistry.googleapis.com
+          secretmanager.googleapis.com sqladmin.googleapis.com
+          --project="$GCP_PROJECT_ID"
+
+      - name: Authenticate Docker to Artifact Registry
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build and push application image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${CLOUD_RUN_SERVICE}:${GITHUB_SHA}"
+          docker build \
+            --file docker/Dockerfile \
+            --build-arg "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}" \
+            --build-arg "VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}" \
+            --build-arg "VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}" \
+            --tag "$image" .
+          docker push "$image"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+
+      - name: Deploy public frontend with Firebase-protected API
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run deploy "$CLOUD_RUN_SERVICE" \
+            --project="$GCP_PROJECT_ID" \
+            --region="$GCP_REGION" \
+            --platform=managed \
+            --image="$IMAGE" \
+            --service-account="$CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT" \
+            --add-cloudsql-instances="$CLOUD_SQL_INSTANCE" \
+            --set-env-vars="AUTH_MODE=firebase,SEED_DEMO=false,GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}" \
+            --set-secrets="DATABASE_URL=${DATABASE_URL_SECRET}:latest" \
+            --allow-unauthenticated \
+            --ingress=all \
+            --cpu=1 \
+            --memory=1Gi \
+            --concurrency=40 \
+            --max-instances=10 \
+            --timeout=60 \
+            --quiet
+          gcloud run services describe "$CLOUD_RUN_SERVICE" \
+            --project="$GCP_PROJECT_ID" \
+            --region="$GCP_REGION" \
+            --format='value(status.url)'
