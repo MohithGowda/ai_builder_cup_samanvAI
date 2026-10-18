@@ -1,0 +1,16 @@
+node_modules
+.venv
+dist
+.git
+__pycache__
+**/__pycache__
+backend/data
+.env
+.env.*
+artifacts
+*-service-account.json
+architecture
+.gitlab-ci.yml
+.gcloudignore
+README.md
+backend/test_*.py

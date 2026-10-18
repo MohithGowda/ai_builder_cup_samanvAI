@@ -1,0 +1,12 @@
+.gcloudignore
+.git
+.venv
+node_modules
+dist
+backend/data
+architecture
+.env
+.env.*
+*-service-account.json
+**/__pycache__
+**/*.pyc

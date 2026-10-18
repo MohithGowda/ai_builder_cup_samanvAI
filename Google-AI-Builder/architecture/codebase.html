@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SamanvAI source architecture: files, modules, dependencies, configuration, persistence, and tests.">
+  <title>SamanvAI | Codebase Architecture</title>
+  <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/architecture.css">
+  <script defer src="assets/logos.generated.js"></script>
+  <script defer src="config/codebase.config.js"></script>
+  <script defer src="assets/architecture.js"></script>
+</head>
+<body data-document="codebase">
+  <header class="document-header">
+    <a class="wordmark" href="codebase.html"><span class="brand-symbol" aria-hidden="true">S</span>Samanv<span>AI</span><small>ARCHITECTURE ATLAS</small></a>
+    <nav aria-label="Architecture documents"><a href="codebase.html" aria-current="page">01 / Codebase</a><a href="request-flow.html">02 / Request flow</a><a href="cloud-run-target.html">03 / Cloud target</a></nav>
+  </header>
+  <main>
+    <div class="document-heading"><div><p class="eyebrow">ENGINEERING REFERENCE / 01</p><h1>From files to a connected system.</h1><p class="lede">Source modules, ownership boundaries, and the links that turn the SamanvAI codebase into a running application.</p></div><span class="edition">SOURCE SNAPSHOT<br><strong>18 October 2026</strong></span></div>
+    <div class="metadata"><span><i class="dot green"></i>Implemented source</span><span><i class="dot blue"></i>Build &amp; delivery</span><span><i class="dot amber"></i>Optional connection</span><span>Static reference, not live discovery</span></div>
+    <section aria-labelledby="diagram-heading" class="diagram-section">
+      <div class="section-top"><div><p class="eyebrow">01.1 / DEPENDENCY MAP</p><h2 id="diagram-heading">The codebase, linked.</h2></div><div class="diagram-tools" role="group" aria-label="Diagram controls"><button type="button" data-action="zoom-out" aria-label="Zoom out" title="Zoom out">-</button><output id="zoom-level" aria-live="polite">100%</output><button type="button" data-action="zoom-in" aria-label="Zoom in" title="Zoom in">+</button><button type="button" data-action="fit" title="Fit diagram to width">Fit</button><button type="button" data-action="download">Export SVG</button><button type="button" data-action="print">Print</button></div></div>
+      <p class="diagram-caption">Arrows point from a consumer to its dependency. Numbered connectors are explained below. Select a file node to reach its mapping entry.</p>
+      <div id="diagram-viewport" class="diagram-viewport" role="region" aria-label="Codebase dependency diagram" tabindex="0"><div id="diagram" class="diagram-canvas"></div></div>
+      <p id="diagram-status" class="diagram-status" role="status">Loading the local diagram configuration...</p>
+      <noscript><p class="notice">JavaScript is required to draw this diagram. Its complete source data is in <a href="config/codebase.config.js">config/codebase.config.js</a>.</p></noscript>
+    </section>
+    <section aria-labelledby="connections-heading"><div class="section-top"><div><p class="eyebrow">01.2 / CONNECTION REGISTER</p><h2 id="connections-heading">What each linkage means.</h2></div></div><div class="table-wrap"><table><thead><tr><th scope="col">Link</th><th scope="col">From</th><th scope="col">To</th><th scope="col">Relationship</th></tr></thead><tbody id="connection-rows"></tbody></table></div></section>
+    <section aria-labelledby="files-heading"><div class="section-top"><div><p class="eyebrow">01.3 / FILE &amp; MODULE MAP</p><h2 id="files-heading">The source of each responsibility.</h2></div><label class="file-filter">Filter files<input id="file-filter" type="search" placeholder="File, module, or responsibility"></label></div><p class="section-description">File links are relative to the repository. Local file access works when opening this document directly; an HTTP preview must serve the repository root to resolve source links.</p><div class="table-wrap"><table class="file-table"><thead><tr><th scope="col">File</th><th scope="col">Module / ownership</th><th scope="col">Provides</th><th scope="col">Depends on / used by</th></tr></thead><tbody id="file-rows"></tbody></table></div><p id="file-count" class="table-count" aria-live="polite"></p></section>
+    <section aria-labelledby="boundary-heading"><div class="section-top"><div><p class="eyebrow">01.4 / IMPORTANT BOUNDARIES</p><h2 id="boundary-heading">What the map does not imply.</h2></div></div><div class="note-grid" id="notes"></div></section>
+    <footer><span>SamanvAI / Architecture atlas</span><div><a href="../README.md">Project guide</a><a href="README.md">Document maintenance</a><a href="request-flow.html">Next: request &amp; telemetry <span aria-hidden="true">&gt;</span></a></div></footer>
+  </main>
+</body>
+</html>

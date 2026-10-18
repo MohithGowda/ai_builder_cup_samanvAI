@@ -1,0 +1,121 @@
+stages:
+  - test
+  - build
+  - deploy
+  - domain
+
+variables:
+  GCP_REGION: asia-south1
+  CLOUD_RUN_SERVICE: samanvai
+  GAR_REPOSITORY: samanvai
+  CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
+
+.gcp_federated:
+  image:
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+    entrypoint: [""]
+  id_tokens:
+    GCP_ID_TOKEN:
+      aud: $GCP_WIF_AUDIENCE
+  before_script:
+    - test -n "$GCP_PROJECT_ID" && test -n "$GCP_PROJECT_NUMBER"
+    - test -n "$GCP_WIF_POOL_ID" && test -n "$GCP_WIF_PROVIDER_ID"
+    - test -n "$GCP_WIF_AUDIENCE" && test -n "$GCP_DEPLOY_SERVICE_ACCOUNT"
+    - printf '%s' "$GCP_ID_TOKEN" > "$CI_PROJECT_DIR/.gitlab-oidc-token"
+    - >-
+      gcloud iam workload-identity-pools create-cred-config
+      "projects/${GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${GCP_WIF_POOL_ID}/providers/${GCP_WIF_PROVIDER_ID}"
+      --service-account="$GCP_DEPLOY_SERVICE_ACCOUNT"
+      --credential-source-file="$CI_PROJECT_DIR/.gitlab-oidc-token"
+      --credential-source-type=text
+      --output-file="$CI_PROJECT_DIR/.gcp-wif.json"
+    - gcloud auth login --cred-file="$CI_PROJECT_DIR/.gcp-wif.json"
+    - gcloud config set project "$GCP_PROJECT_ID"
+  after_script:
+    - rm -f "$CI_PROJECT_DIR/.gitlab-oidc-token" "$CI_PROJECT_DIR/.gcp-wif.json"
+
+backend_tests:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install --no-cache-dir -r backend/requirements.txt
+    - python -m unittest backend.test_domain backend.test_jurisdiction backend.test_retrieval backend.test_api -v
+
+frontend_build:
+  stage: test
+  image: node:22-alpine
+  script:
+    - npm ci
+    - npm run build
+
+build_image:
+  extends: .gcp_federated
+  stage: build
+  script:
+    - test -n "$VITE_FIREBASE_API_KEY" && test -n "$VITE_FIREBASE_AUTH_DOMAIN" && test -n "$VITE_FIREBASE_PROJECT_ID"
+    - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${CLOUD_RUN_SERVICE}:${CI_COMMIT_SHA}"
+    - >-
+      gcloud builds submit .
+      --project="$GCP_PROJECT_ID"
+      --region="$GCP_REGION"
+      --config=docker/cloudbuild.yaml
+      --substitutions="_IMAGE=${IMAGE},_VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY},_VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN},_VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}"
+    - printf 'IMAGE=%s\n' "$IMAGE" > image.env
+  artifacts:
+    reports:
+      dotenv: image.env
+    expire_in: 1 day
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+deploy_cloud_run:
+  extends: .gcp_federated
+  stage: deploy
+  needs:
+    - job: build_image
+      artifacts: true
+  script:
+    - test -n "$CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT" && test -n "$CLOUD_SQL_INSTANCE"
+    - test -n "$DATABASE_URL_SECRET"
+    - >-
+      gcloud run deploy "$CLOUD_RUN_SERVICE"
+      --project="$GCP_PROJECT_ID"
+      --region="$GCP_REGION"
+      --platform=managed
+      --image="$IMAGE"
+      --service-account="$CLOUD_RUN_RUNTIME_SERVICE_ACCOUNT"
+      --add-cloudsql-instances="$CLOUD_SQL_INSTANCE"
+      --set-env-vars="AUTH_MODE=firebase,SEED_DEMO=false,GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}"
+      --set-secrets="DATABASE_URL=${DATABASE_URL_SECRET}:latest"
+      --allow-unauthenticated
+      --ingress=all
+      --cpu=1
+      --memory=1Gi
+      --concurrency=40
+      --max-instances=10
+      --timeout=60
+      --quiet
+    - gcloud run services describe "$CLOUD_RUN_SERVICE" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+map_custom_domain:
+  extends: .gcp_federated
+  stage: domain
+  needs:
+    - deploy_cloud_run
+  script:
+    - test -n "$APP_DOMAIN"
+    - >-
+      gcloud run domain-mappings create
+      --project="$GCP_PROJECT_ID"
+      --region="$GCP_REGION"
+      --service="$CLOUD_RUN_SERVICE"
+      --domain="$APP_DOMAIN"
+      --quiet
+    - gcloud run domain-mappings describe "$APP_DOMAIN" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='yaml(status.resourceRecords)'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $APP_DOMAIN'
+      when: manual
+      allow_failure: true
+    - when: never

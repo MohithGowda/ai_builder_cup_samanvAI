@@ -1,0 +1,266 @@
+:root {
+  color-scheme: dark;
+  --page: #111416;
+  --surface: #1a1f22;
+  --surface-raised: #22292d;
+  --surface-inset: #15191c;
+  --text: #e3ecee;
+  --text-secondary: #b1bfc3;
+  --muted: #92a5aa;
+  --line: #303a3b;
+  --green: #48c6d0;
+  --green-dark: #154f5a;
+  --lime: #9edfe4;
+  --accent-surface: #19363d;
+  --accent-border: #315963;
+  --accent-text: #b1e4e9;
+  --accent-ink: #082d33;
+  --network-government: 49, 174, 188;
+  --network-citizen: 90, 190, 211;
+  --amber: #e4b56d;
+  --red: #ef9d91;
+  --chart-grid: #303a3b;
+  --chart-tick: #94aab0;
+  --chart-received: #48c6d0;
+  --chart-resolved: #83b8e6;
+  background: var(--page);
+  color: var(--text);
+}
+
+body { background: var(--page); }
+::selection { background: #256577; color: #fff; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible { outline-color: var(--green); }
+button:disabled { opacity: .5; }
+input, select, textarea { accent-color: var(--green); }
+input::placeholder, textarea::placeholder { color: #91a5aa; opacity: 1; }
+select option { background: var(--surface-raised); color: var(--text); }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: var(--surface-inset); }
+::-webkit-scrollbar-thumb { background: #40565c; border: 2px solid var(--surface-inset); border-radius: 5px; }
+
+.app-shell {
+  background-image: linear-gradient(150deg, #48c6d006, transparent 45%);
+}
+.sidebar { background: #151a1c; border-color: var(--line); }
+.topbar { background: #171c1e; border-color: var(--line); }
+.brand { color: #e7f0f2; }
+.brand-ai { color: var(--green); }
+.brand-mark { background: #155563; color: #b6eff2; }
+.brand small, .nav-label { color: #91a5ac; }
+.workspace-label { background: #1b2529; border-color: #33464d; color: #d0dfe4; }
+.workspace-label small { color: #98adb4; }
+.workspace-icon { background: #243e47; color: #96cfd9; }
+.tiny-tag { color: #9eb9c1; border-color: #35515b; background: #1e3037; }
+.nav-item { color: #a5b9bf; }
+.nav-item:hover { background: #1c3038; color: #deeff2; }
+.nav-item.active { background: #173b45; color: #a5e7ed; }
+.nav-item.active::before { background: var(--green); }
+.nav-count { color: #a4c5cf; background: #243c46; border-color: #37545e; }
+.alert-count { color: #e2be7d; background: #3d3423; border-color: #54482f; }
+.system-state { color: #9bbdc6; }
+.profile { background: #192226; color: #d5e5e9; border-color: var(--line); }
+.profile small { color: #93b0ba; }
+.profile-avatar, .top-avatar { background: #294652; color: #b5e5eb; }
+.pilot-photo { border: 1px solid #344952; }
+.pilot-photo img { opacity: .85; }
+.breadcrumbs { color: #95adb4; }
+.breadcrumbs strong { color: #cbdfe5; }
+.demo-label { color: #a6ccd7; background: #263b45; }
+.demo-label > span { background: #6dbbc9; }
+.topbar-divider, .filter-separator { background: var(--line); }
+.notification-dot { background: #edbd70; border-color: var(--surface); }
+.icon-button { color: #9db3ba; }
+.icon-button:hover { background: #24434d; color: #a9e7ee; }
+
+h1, .page-heading h1 { color: #e0edf0; }
+.eyebrow { color: #8eb7c2; }
+.page-heading p, .section-heading p, .metric-label, .table-secondary,
+.chart-footer, .sla-note, .period-label, .chat-intro p, .citizen-actions small,
+.fine-print, .method-note, .form-intro { color: var(--muted); }
+.inline-dot { background: #73b9c8; }
+.primary { background: var(--green); color: var(--accent-ink); border-color: var(--green); font-weight: 650; }
+.primary:hover { background: #77dae1; border-color: #77dae1; }
+.secondary { background: #202a2f; color: #bfd6df; border-color: #37515d; }
+.secondary:hover { background: #26414d; color: #dceff4; }
+.select-wrap { background: #1b2930; border-color: #36515d; color: #9ebdca; }
+.select-wrap select { color: #bdd6df; }
+.live-status { color: #99bdca; }
+.live-status:hover { color: var(--green); }
+.status-light { background: #55c6cd; box-shadow: 0 0 0 3px #55c6cd10; }
+.status-light.offline { background: var(--amber); }
+
+.insight-banner { background: #17323d; border-color: #2e5664; }
+.insight-icon { color: #9ddfe8; background: #214958; border-color: #356574; }
+.insight-banner strong { color: #c0e4ed; }
+.insight-banner p { color: #9bbdca; }
+.insight-banner b { color: #a9d6e2; }
+.insight-banner button { color: #a6dce8; }
+.metric-strip, .chart-panel, .district-panel, .agent-status-panel,
+.delayed-section, .applications-view, .district-record, .chat-workspace {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: 0 2px 6px #0000000d;
+}
+.metric { border-color: var(--line); }
+.metric-label > svg { color: #7ba6b5; }
+.metric-value { color: #e7f0f2; }
+.metric-detail.green { color: #80ced9; }
+.metric-detail.amber { color: #e2b573; }
+.metric-detail.neutral { color: #9eb9c3; }
+.section-heading h2 { color: #d4e5ec; }
+.chart-legend { color: #9dbac6; }
+.legend-dot.requests { background: var(--chart-received); }
+.legend-dot.resolved { background: var(--chart-resolved); }
+.chart-footer { border-color: var(--line); }
+.recharts-tooltip-cursor { stroke: #739eae; }
+.recharts-default-tooltip .recharts-tooltip-label { color: #deedf2; }
+.sla-row > div:first-child { color: #b7ced9; }
+.sla-row strong { color: #7acbd9; }
+.text-amber { color: #e5b979 !important; }
+.progress-track { background: #2a3941; }
+.progress-track > div { background: #3daab9; }
+.progress-track > div.bar-amber { background: #ceab68; }
+.agent-count { color: #9dc6d5; border-color: #355260; background: #213742; }
+.district-tile strong { color: #c7dfe7; }
+.heat-low { background: #1b3c47; color: #8ac9d8; border-color: #315967; }
+.heat-medium { background: #3b3625; color: #dfc18c; border-color: #524a33; }
+.heat-high { background: #44312a; color: #e0b298; border-color: #5c4235; }
+.district-tile:hover { filter: brightness(1.15); }
+.heat-legend { color: #99b7c4; }
+.orbit-line { border-color: #3f6474; }
+.orbit-center { background: #185366; color: #a1e3eb; box-shadow: 0 3px 20px #48c6d00a; }
+.orbit-node { background: #243944; border-color: #375967; color: #9cc7d8; }
+.badge { background: #263b45; color: #a5c6d2; }
+.badge.green { background: #1b3e49; color: #89d1de; }
+.badge.amber { background: #413622; color: #e7c17d; }
+.badge.red { background: #48302b; color: #efb09b; }
+.badge.neutral { background: #2a3c46; color: #b2cbd6; }
+.agent-summary p { color: #99b7c4; }
+.text-button { color: #8bc7d9; }
+.text-button:hover { color: #b7e8f0; }
+.number-tag { background: #3a3526; color: #d1c18e; }
+
+th { background: #202c33; color: #a4c1ce; border-color: #304650; }
+td { color: #adc8d5; border-color: #293d47; }
+tbody tr:hover { background: #233945; }
+.case-link { color: #84ccdf; }
+.table-secondary, .muted { color: #93aebd; }
+.mini-avatar { background: #2d4652; color: #b4d8e2; }
+.delay { color: #e6b486; }
+.green { color: #8ad0db; }
+.amber { color: #dfbd80; }
+.neutral { color: #a3bfcc; }
+.page-footer { color: #849eab; }
+.footer-sep { color: #466472; }
+.loading { color: #8fc5d9; }
+.error-banner { background: #3e3027; border-color: #71513a; color: #e2bd96; }
+.error-banner p { color: #c8b49c; }
+.empty { color: #86b7c9; }
+.empty h3 { color: #aed7e6; }
+.empty p { color: #98b7c6; }
+.application-toolbar, .pagination { border-color: var(--line); }
+.search-box { background: #1d2d35; border-color: #355362; color: #96b8c8; }
+.search-box input { color: #c4e0ec; }
+.search-box input::placeholder { color: #87a8b9; }
+.result-count, .pagination { color: #94b8ca; }
+
+.district-title { color: #96cbde; }
+.district-title > span { color: #94b8c9; }
+.district-record-head h3 { color: #c6e2ed; }
+.location-icon { background: #22424f; color: #97cddd; }
+.district-stats > div { border-color: #36525e; }
+.district-stats strong { color: #c9e8f2; }
+.district-stats span { color: #a0c0d0; }
+.feedback-view, .feedback-breakdown .method-note { border-color: var(--line); }
+.feedback-score { color: #80c3d7; }
+.feedback-score > strong { color: #9fe2eb; }
+.feedback-score p { color: #9abccd; }
+.complaint-row { color: #abc8d5; }
+
+.chat-intro, .chat-form, .agent-directory > .section-heading,
+.agent-directory-row { border-color: var(--line); }
+.agent-avatar { background: #20424f; color: #a1dce8; }
+.chat-intro h2 { color: #bfdeeb; }
+.suggestion { background: #1b2f39; border-color: #345465; color: #a9cddd; }
+.suggestion:hover { background: #244452; border-color: #497c90; }
+.chat-input { background: #14242d; border-color: #396274; }
+.chat-input input { color: #d5eaf2; }
+.chat-input input::placeholder { color: #8bafc1; }
+.send-button { background: #48b9c8; color: #0b3039; }
+.consent { color: #a0c0d0; }
+.consent input { accent-color: var(--green); }
+.directory-icon { background: #24424f; color: #94c6d8; }
+.agent-color-1 { background: #293641; color: #a0bfd5; }
+.agent-color-2 { background: #423c2b; color: #d7c38e; }
+.agent-color-3 { background: #45332a; color: #ddb899; }
+.agent-color-4 { background: #37323e; color: #c4b0cf; }
+.agent-color-5 { background: #20424a; color: #95ced8; }
+.agent-directory-row strong { color: #b9dce9; }
+.agent-directory-row > div > span { color: #96b8c8; }
+.agent-engine { background: #193944; border-color: #305a6c; color: #97cbde; }
+.agent-engine strong { color: #a9dce8; }
+.agent-engine p { color: #95bdce; }
+.user-message { background: #244552; color: #cce8f2; }
+.assistant-label { color: #99d5e5; }
+.assistant-label > span { color: #95bbce; }
+.assistant-message > p { color: #b4d2e0; }
+.execution { background: #1b303a; border-color: #34566a; }
+.execution summary, .execution li { color: #a5cddd; }
+.execution li span, .source { color: #91b9cc; }
+.thinking { color: #93c8dc; }
+
+.citizen-actions > button, .citizen-case { background: var(--surface); border-color: var(--line); }
+.citizen-actions > button:hover, .citizen-case:hover { background: #223b46; border-color: #3e6c7e; }
+.citizen-action-icon { background: #214552; color: #9dd5e3; }
+.citizen-actions strong, .citizen-case h3 { color: #c0e3ef; }
+.citizen-actions > button > svg { color: #99c7dc; }
+.case-id, .citizen-case > p, .citizen-case-bottom { color: #9bbfd0; }
+.citizen-case-bottom { border-color: #305262; }
+.citizen-banner { border: 1px solid #355e6b; }
+.citizen-banner-content h2 { color: #fff; }
+.citizen-banner-content p { color: #d1e7ee; }
+.audit-banner { background: #1b3d48; border-color: #325f70; color: #99d0df; }
+.audit-banner h2 { color: #b3deeb; }
+.audit-banner p { color: #93bccf; }
+.audit-event { border-color: var(--line); }
+.audit-check { background: #224a56; color: #91d2df; }
+.audit-event-heading { color: #a6d8e6; }
+.audit-event-heading time, .audit-event > div > span { color: #88b4ca; }
+.audit-event p { color: #a4cddd; }
+.audit-event small { color: #91bcd0; }
+
+.toast { background: #203b47; border-color: #43768b; color: #c4e5f0; box-shadow: 0 8px 35px #0005; }
+.toast-error { background: #423127; border-color: #896342; color: #e5c5a4; }
+.modal { background: #1b2830; color: #bdd9e5; border-color: #3b6276; box-shadow: 0 15px 90px #0008; }
+.modal::backdrop { background: #030706b8; backdrop-filter: blur(5px); }
+.modal-head { background: #20333e; border-color: #31556a; }
+.modal-head h2 { color: #c0e1ee; }
+.service-form > label, .form-columns > label { color: #a9cddd; }
+.service-form select, .service-form input, .service-form textarea { background: #12242e; border-color: #3b687e; color: #cce7f2; }
+.service-form textarea::placeholder { color: #88b0c5; }
+.form-note { background: #1c3c49; border-color: #315f75; color: #9ecadd; }
+.form-note strong { color: #b9e2ef; }
+.eligibility-result { background: #173d48; border-color: #316b7c; }
+.eligibility-result h3, .eligibility-result h4 { color: #a9e0ec; }
+.eligibility-result ul { color: #94c6da; }
+.eligibility-result small { color: #84b5cc; }
+.passed { color: #83cfdd; }
+.failed { color: #e0bb86; }
+.case-detail-id { color: #94c4d9; }
+.case-modal > h3 { color: #bce7f2; }
+.detail-grid span { color: #94bfd3; }
+.detail-grid strong { color: #b8ddeb; }
+.case-stage { background: #3e3a23; border-color: #665c35; color: #ddca8e; }
+.case-stage p { color: #bfb17d; }
+.document-list h4 { color: #abd8e7; }
+.document-list > span, .document-list p { color: #92bed3; }
+.infrastructure-row { border-color: #31556b; }
+.infrastructure-row strong { color: #b5ddec; }
+.infrastructure-row p, .help-content > p { color: #9dc5d8; }
+.help-brand { color: #a4dfe9; }
+.nav-scrim { background: #030706a8; }
+
+@media (forced-colors: active) {
+  .primary, .secondary, .badge, .district-tile { border: 1px solid ButtonText; }
+}

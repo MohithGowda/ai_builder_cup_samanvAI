@@ -1,0 +1,49 @@
+import { useState } from 'react'
+import { ArrowDownToLine, ArrowRight, Building2, CheckCircle2, Clock3, FileText, MapPin, ShieldCheck, TriangleAlert } from 'lucide-react'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { api, type Case, type Overview, type ReviewReport, type ReviewRow, type WorkspaceUser } from './api'
+import GovernanceMap from './GovernanceMap'
+import './review-workspace.css'
+
+const formatPercent = (value: number | null) => value === null ? 'N/A' : `${value}%`
+
+export default function GovernanceReview({ data, user, query, select, inspect, drilldown, department }: { data: Overview; user: WorkspaceUser; query: string; select: (item: Case) => void; inspect: () => void; drilldown: (name: string) => void; department: string }) {
+  const [tab, setTab] = useState<'overall' | 'department'>('overall')
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
+  const scope = data.scope
+  const departmentRows = data.department_summary.filter(row => tab === 'overall' || !department || row.name === department)
+  const scopeName = scope.taluk || scope.district || scope.department || 'Karnataka pilot'
+  const maxTerritory = Math.max(1, ...data.territories.map(row => row.total))
+  const maxAging = Math.max(1, ...data.aging.map(row => row.count))
+  async function downloadReport() {
+    setExporting(true); setExportError('')
+    try {
+      const report = await api<ReviewReport>(`/reports/summary${query}`)
+      const anchor = document.createElement('a')
+      const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }))
+      anchor.href = url; anchor.download = `samanvai-${scope.level}-overall-report.json`; anchor.click(); URL.revokeObjectURL(url)
+    } catch (error) { setExportError((error as Error).message) }
+    finally { setExporting(false) }
+  }
+  function reviewTable(rows: ReviewRow[]) {
+    return <div className="table-scroll"><table className="official-matrix"><thead><tr><th>Department</th><th>Received</th><th>Resolved</th><th>Open</th><th>Overdue</th><th>SLA compliance</th></tr></thead><tbody>{rows.map(row => <tr key={row.name}><td><span className="review-department-name"><Building2 size={14} />{row.name}</span></td><td>{row.total}</td><td>{row.resolved}</td><td>{row.pending}</td><td className={row.overdue ? 'review-risk' : ''}>{row.overdue}</td><td><span className="review-compliance"><span className="review-compliance-track"><i style={{ width: `${row.compliance || 0}%` }} /></span>{formatPercent(row.compliance)}</span></td></tr>)}</tbody></table></div>
+  }
+  return <div className="governance-review">
+    <div className="review-mandate"><div className="review-mandate-icon"><ShieldCheck size={26} /></div><div><span className="review-kicker">{scope.level.toUpperCase()} DELIVERY REVIEW</span><h2>{scopeName}</h2><p>{user.designation} <span>/</span> {scope.department || department || 'Cross-department oversight'}</p></div><div className="review-mandate-meta"><span><span className="status-light" /> {new Date(data.updated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span><small>Authorized jurisdiction</small></div></div>
+    <div className="review-tabs" role="tablist" aria-label="Review perspective"><button role="tab" aria-selected={tab === 'overall'} onClick={() => setTab('overall')}><FileText size={15} />Overall report</button><button role="tab" aria-selected={tab === 'department'} onClick={() => setTab('department')}><Building2 size={15} />Department review</button><button className="review-download" onClick={() => void downloadReport()} disabled={exporting}><ArrowDownToLine size={14} />{exporting ? 'Preparing...' : 'Download report'}</button></div>
+    <GovernanceMap key={`${scope.role}-${scope.district || ''}-${scope.taluk || ''}-${scope.department || department || ''}`} data={data} department={scope.department || department} drilldown={drilldown} />
+    {exportError && <p className="review-export-error" role="alert">{exportError}</p>}
+    <div className="review-kpis">{[
+      { label: 'Applications received', value: data.total.toLocaleString('en-IN'), note: `${data.resolved} resolved`, icon: FileText, tone: '' },
+      { label: 'Awaiting resolution', value: data.pending.toLocaleString('en-IN'), note: `${data.overdue} beyond deadline`, icon: Clock3, tone: 'warning' },
+      { label: 'SLA compliance', value: formatPercent(data.compliance), note: 'Open + completed cases', icon: ShieldCheck, tone: '' },
+      { label: 'Average overdue delay', value: `${data.average_delay}d`, note: `${data.escalations} escalations recorded`, icon: TriangleAlert, tone: data.overdue ? 'warning' : '' },
+      { label: 'Citizen satisfaction', value: formatPercent(data.satisfaction), note: `${data.feedback_count} feedback records`, icon: CheckCircle2, tone: '' },
+    ].map(item => <div key={item.label} className={`review-kpi ${item.tone}`}><span>{item.label}<item.icon size={16} /></span><strong>{item.value}</strong><small>{item.note}</small></div>)}</div>
+    <div className="review-chart-layout"><section className="review-volume"><div className="review-section-heading"><div><h3>Service delivery trend</h3><p>Received and resolved · last 14 days</p></div><div className="review-legend"><span><i />Received</span><span><i />Resolved</span></div></div><div className="review-line-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.trend} margin={{ top: 12, right: 10, left: -22, bottom: 0 }}><CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 5" vertical={false} /><XAxis dataKey="date" tickFormatter={value => new Date(`${value}T12:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} tick={{ fill: 'var(--chart-tick)', fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={26} /><YAxis allowDecimals={false} tick={{ fill: 'var(--chart-tick)', fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: 'var(--surface-raised)', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12 }} /><Area dataKey="requests" name="Received" stroke="var(--chart-received)" fill="var(--chart-received)" fillOpacity={0.08} strokeWidth={2.5} isAnimationActive={false} /><Area dataKey="resolved" name="Resolved" stroke="var(--chart-resolved)" fill="transparent" strokeWidth={2} strokeDasharray="4 4" isAnimationActive={false} /></AreaChart></ResponsiveContainer></div></section><section className="review-aging"><div className="review-section-heading"><div><h3>Open-case aging</h3><p>{data.pending} applications awaiting resolution</p></div><Clock3 size={18} /></div>{data.aging.map((item, index) => <div className="review-aging-row" key={item.label}><div><span>{item.label}</span><strong>{item.count}</strong></div><div><i className={index === 3 ? 'aging-oldest' : ''} style={{ width: `${item.count / maxAging * 100}%` }} /></div></div>)}<p className="review-small-note">Aging uses elapsed days, not delay beyond each service deadline.</p></section></div>
+    <section className="review-departments"><div className="review-section-heading"><div><h3>{tab === 'overall' ? 'Department performance matrix' : department || scope.department || 'Department service review'}</h3><p>One consistent reporting format across all authorized levels</p></div><span>{departmentRows.length} departments</span></div>{reviewTable(departmentRows)}{tab === 'department' && <div className="review-service-strip">{data.services.filter(service => service.total).map(service => <div key={service.service}><span>{service.service}</span><strong>{formatPercent(service.compliance)}</strong><small>{service.total} received · {service.delayed} overdue</small></div>)}</div>}</section>
+    <div className="review-bottom-layout"><section className="review-territories"><div className="review-section-heading"><div><h3>{data.territory_level === 'taluk' ? 'Taluk' : 'District'} delivery comparison</h3><p>Comparable volumes within your authorized scope</p></div><MapPin size={18} /></div>{data.territories.map(row => <button type="button" key={row.name} className="review-territory-row" onClick={() => drilldown(row.name)}><span>{row.name}</span><div className="review-territory-bar"><i style={{ width: `${row.resolved / maxTerritory * 100}%` }} /><i style={{ width: `${(row.pending - row.overdue) / maxTerritory * 100}%` }} /><i style={{ width: `${row.overdue / maxTerritory * 100}%` }} /></div><strong>{row.total}</strong><small>{row.overdue} overdue</small><ArrowRight size={13} /></button>)}<div className="review-legend territory-legend"><span><i />Resolved</span><span><i />Open within SLA</span><span><i />Overdue</span></div></section><section className="review-attention"><div className="review-section-heading"><div><h3>Priority case queue</h3><p>Oldest unresolved deadline breaches</p></div><button type="button" onClick={inspect}>View all<ArrowRight size={13} /></button></div>{data.delayed_cases.length ? data.delayed_cases.slice(0, 4).map(item => <button type="button" className="review-priority-case" key={item.id} onClick={() => select(item)}><div><strong>{item.service}</strong><span>{item.id} · {item.taluk}, {item.district}</span></div><small>{item.delay}d late<ArrowRight size={13} /></small></button>) : <div className="review-clear"><CheckCircle2 size={24} />No overdue cases in this selection.</div>}</section></div>
+    <div className="review-methodology"><ShieldCheck size={15} /><p>Synthetic Karnataka pilot covering six districts. Taluk allocations on legacy demo records are derived and illustrative. Metrics use only your authorized selection; SLA compliance includes open and completed cases. Satisfaction excludes neutral feedback from its denominator.{data.unassigned_taluk > 0 && ` ${data.unassigned_taluk} cases have no taluk assignment.`}</p></div>
+  </div>
+}
